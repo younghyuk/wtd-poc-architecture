@@ -1,24 +1,18 @@
 package com.ethan.wtdpocarchitecture.data
 
 import com.ethan.wtdpocarchitecture.domain.ProductRepository
-import com.ethan.wtdpocarchitecture.domain.model.PRODUCTS_SAMPLE
 import com.ethan.wtdpocarchitecture.domain.model.Product
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.update
 
-class ProductRepositoryImpl : ProductRepository {
-    private val _products = MutableStateFlow(emptyList<Product>())
-    override val products: Flow<List<Product>> = _products.asStateFlow()
+class ProductRepositoryImpl(private val productDataSource: ProductDataSource) : ProductRepository {
+    override val products: Flow<List<Product>> = productDataSource.products
     override suspend fun loadProductAll() {
-        _products.update { PRODUCTS_SAMPLE }
+        productDataSource.loadProductAll()
     }
     override suspend fun addProduct(product: Product) {
-        _products.getAndUpdate { it + product }
+        productDataSource.addProduct(product)
     }
     override suspend fun removeLastProduct() {
-        _products.getAndUpdate { it.dropLast(1) }
+        productDataSource.removeLastProduct()
     }
 }
