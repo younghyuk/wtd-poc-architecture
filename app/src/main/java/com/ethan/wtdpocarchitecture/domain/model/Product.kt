@@ -1,4 +1,4 @@
-package com.ethan.wtdpocarchitecture.data.model
+package com.ethan.wtdpocarchitecture.domain.model
 
 import kotlin.random.Random
 

@@ -1,23 +1,35 @@
 package com.ethan.wtdpocarchitecture.presentation
 
 import androidx.lifecycle.ViewModel
-import com.ethan.wtdpocarchitecture.data.model.PRODUCTS_SAMPLE
-import com.ethan.wtdpocarchitecture.data.model.Product
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import com.ethan.wtdpocarchitecture.DependenciesProvider
+import com.ethan.wtdpocarchitecture.domain.ProductRepository
+import com.ethan.wtdpocarchitecture.domain.model.Product
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
-    private val _products = MutableStateFlow(emptyList<Product>())
-    val products = _products.asStateFlow()
+class MainViewModel(
+    private val productRepository: ProductRepository = DependenciesProvider.productRepository
+) : ViewModel() {
+    val products = productRepository.products.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
     fun loadProductAll() {
-        _products.update { PRODUCTS_SAMPLE }
+        viewModelScope.launch {
+            productRepository.loadProductAll()
+        }
     }
     fun addProduct(product: Product) {
-        _products.getAndUpdate { it + product }
+        viewModelScope.launch {
+            productRepository.addProduct(product)
+        }
     }
     fun removeLastProduct() {
-        _products.getAndUpdate { it.dropLast(1) }
+        viewModelScope.launch {
+            productRepository.removeLastProduct()
+        }
     }
 }
